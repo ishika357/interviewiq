@@ -1,0 +1,50 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div><h1>Welcome back, {{ user.name.split(' ')[0] }}</h1><p>Here is your preparation progress, computed from your saved interviews.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('web.interview_new') }}">{{ icon('play') }} Start New Interview</a>
+</div>
+
+{% if d.active_interview_id %}
+<div class="card flat row between" style="margin-bottom:18px;border-color:var(--primary)">
+  <div>{{ icon('refresh') }} <strong>You have an interview in progress.</strong> <span class="muted">Your submitted answers are saved.</span></div>
+  <a class="btn btn-sm btn-primary" href="{{ url_for('web.interview_room', iid=d.active_interview_id) }}">Resume</a>
+</div>{% endif %}
+
+<div class="grid g4">
+  <div class="card stat"><div class="label">{{ icon('history') }} Total interviews</div><div class="val">{{ d.total }}</div></div>
+  <div class="card stat"><div class="label">{{ icon('target') }} Average score</div><div class="val">{{ d.average if d.average is not none else '-' }}{% if d.average is not none %}<small>/100</small>{% endif %}</div></div>
+  <div class="card stat"><div class="label">{{ icon('sparkle') }} Best score</div><div class="val">{{ d.best if d.best is not none else '-' }}{% if d.best is not none %}<small>/100</small>{% endif %}</div></div>
+  <div class="card stat"><div class="label">{{ icon('chart') }} Improvement</div>
+    <div class="val {{ 'good' if d.improvement_pct and d.improvement_pct>0 else 'bad' if d.improvement_pct and d.improvement_pct<0 }}">
+      {% if d.improvement_pct is not none %}{{ '+' if d.improvement_pct>0 }}{{ d.improvement_pct }}%{% else %}-{% endif %}</div>
+    <div class="small muted">{% if d.improvement_points is not none %}{{ d.improvement_points }} points, latest vs earliest interviews{% else %}Complete 2 interviews to see this{% endif %}</div></div>
+</div>
+
+<div class="grid g2" style="margin-top:18px;grid-template-columns:1.4fr 1fr">
+  <div class="card"><h3>Performance over time</h3>
+    {% if d.trend|length >= 1 %}<div class="chart-box"><canvas id="trend" aria-label="Score trend chart" role="img"></canvas></div><p id="chartFallback" class="muted small" hidden>Chart library could not load (offline?).</p>
+    {% else %}<div class="empty">{{ icon('chart') }}<p>No completed interviews yet.<br>Finish your first interview to see your trend.</p></div>{% endif %}</div>
+  <div class="card"><h3>Recent interviews</h3>
+    {% if d.recent %}<table class="t"><tbody>
+      {% for r in d.recent %}<tr><td><a href="{{ url_for('web.results', iid=r.id) }}"><strong>{{ r.role }}</strong></a><div class="small muted">{{ r.difficulty }} &middot; {{ r.completed_at|pretty_dt }}</div></td>
+        <td style="text-align:right"><span class="score-pill {{ r.overall|score_class }}">{{ '%.0f'|format(r.overall) }}</span></td></tr>{% endfor %}
+    </tbody></table><a class="btn btn-sm btn-ghost" href="{{ url_for('web.history') }}" style="margin-top:10px">View all history</a>
+    {% else %}<div class="empty">{{ icon('play') }}<p>Your reports will appear here.</p><a class="btn btn-sm btn-primary" href="{{ url_for('web.interview_new') }}">Start your first interview</a></div>{% endif %}</div>
+</div>
+{% endblock %}
+{% block scripts %}
+{% if d.trend|length >= 1 %}
+<script>
+const trend = {{ d.trend|tojson_safe|safe }};
+loadChart().then(C => {
+  if (!C) { document.getElementById('chartFallback').hidden = false; return; }
+  new C(document.getElementById('trend'), { type: 'line',
+    data: { labels: trend.map((t, i) => '#' + (i + 1) + ' ' + t.label), datasets: [{ label: 'Overall score', data: trend.map(t => t.overall), borderColor: '#8667F5', backgroundColor: 'rgba(134,103,245,.18)', fill: true, tension: .3, pointBackgroundColor: '#35C9E7' }] },
+    options: { maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } }, plugins: { legend: { display: false } } } });
+});
+</script>
+{% endif %}
+{% endblock %}

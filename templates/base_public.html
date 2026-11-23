@@ -1,0 +1,36 @@
+{% from '_icons.html' import icon %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}InterviewIQ - AI Interview Intelligence Platform{% endblock %}</title>
+  <meta name="description" content="Practice interviews, receive intelligent feedback, identify skill gaps and build confidence with AI-powered preparation.">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<header class="pub-nav"><div class="in">
+  <a class="logo" href="{{ url_for('web.landing') }}"><span class="logo-mark">{{ icon('brain') }}</span>InterviewIQ</a>
+  <nav aria-label="Main">
+    <a href="{{ url_for('web.landing') }}#home">Home</a>
+    <a href="{{ url_for('web.landing') }}#features">Features</a>
+    <a href="{{ url_for('web.landing') }}#how">How It Works</a>
+    {% if user %}<a class="btn btn-primary btn-sm" href="{{ url_for('web.dashboard') }}">Dashboard</a>
+    {% else %}<a href="{{ url_for('web.login') }}">Login</a><a class="btn btn-primary btn-sm" href="{{ url_for('web.register') }}">Get Started</a>{% endif %}
+  </nav>
+</div></header>
+{% block content %}{% endblock %}
+{% block footer %}
+<footer class="pub"><div class="container row between">
+  <div><a class="logo" href="/"><span class="logo-mark">{{ icon('brain') }}</span>InterviewIQ</a>
+  <p class="small" style="margin-top:8px">AI Interview Intelligence Platform. Built with Flask, Whisper, RAG and LLMs.</p></div>
+  <div class="small">&copy; InterviewIQ. Practice tool: scores are guidance, not hiring decisions.</div>
+</div></footer>
+{% endblock %}
+<div id="toasts" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

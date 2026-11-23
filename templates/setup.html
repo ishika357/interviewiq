@@ -1,0 +1,73 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}Start Interview{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Set up your interview</h1><p>Six quick steps. You can go back at any time.</p></div></div>
+
+<div class="wiz-steps" id="steps" aria-label="Progress">
+  {% for n, t in [(1,'Role'),(2,'Difficulty'),(3,'Questions'),(4,'Resume'),(5,'Camera & mic'),(6,'Start')] %}<div class="s" data-step="{{ n }}"><b>{{ n }}</b>{{ t }}</div>{% endfor %}
+</div>
+
+<form id="wiz" class="card" novalidate>
+  <section data-panel="1">
+    <h2>1. Select job role</h2>
+    <div class="options" role="radiogroup" aria-label="Job role">
+      {% for r in roles %}<label class="opt"><input type="radio" name="role" value="{{ r }}" {{ 'checked' if loop.first }}><span class="box"><strong>{{ 'Other / custom role' if r=='Other' else r }}</strong><span>{{ {'AI Engineer':'LLMs, ML, Python, RAG','Python Developer':'Python, DSA, SQL, backend','Data Analyst':'SQL, statistics, analysis','Software Developer':'DSA, OOP, APIs, Git','Machine Learning Engineer':'ML, deep learning, MLOps basics','QA Engineer':'Testing, automation, SQL','Other':'Type your own role'}[r] }}</span></span></label>{% endfor %}
+    </div>
+    <div class="field" id="customWrap" style="margin-top:14px" hidden><label for="custom_role">Custom role name</label><input id="custom_role" name="custom_role" type="text" maxlength="60" placeholder="e.g. DevOps Engineer"></div>
+  </section>
+
+  <section data-panel="2" hidden>
+    <h2>2. Select difficulty</h2>
+    <div class="options">
+      {% for d, desc in [('Beginner','Fundamentals and definitions'),('Intermediate','Concepts with practical reasoning'),('Advanced','Trade-offs, internals and design')] %}
+      <label class="opt"><input type="radio" name="difficulty" value="{{ d }}" {{ 'checked' if d=='Intermediate' }}><span class="box"><strong>{{ d }}</strong><span>{{ desc }}</span></span></label>{% endfor %}
+    </div>
+    <p class="small muted" style="margin-top:12px">The interviewer adapts within your chosen level: strong answers get harder follow-ups, weak ones get foundation probes.</p>
+  </section>
+
+  <section data-panel="3" hidden>
+    <h2>3. Number of questions</h2>
+    <div class="options">
+      {% for n, t in [(5,'About 10 minutes'),(10,'About 20 minutes'),(15,'About 30 minutes')] %}
+      <label class="opt"><input type="radio" name="num_questions" value="{{ n }}" {{ 'checked' if n==5 }}><span class="box"><strong>{{ n }} questions</strong><span>{{ t }}</span></span></label>{% endfor %}
+    </div>
+  </section>
+
+  <section data-panel="4" hidden>
+    <h2>4. Resume <span class="muted small">(optional)</span></h2>
+    <p class="muted">Upload a PDF to get questions about the skills and projects listed in it. We keep only the extracted text, not the file.</p>
+    <label class="dropzone" id="drop" for="resume"><div>{{ icon('upload') }}</div><div id="dropText">Click or drop a PDF here (max 5 MB)</div></label>
+    <input class="sr" type="file" id="resume" name="resume" accept="application/pdf,.pdf">
+    <div id="resumeOut" style="margin-top:14px"></div>
+  </section>
+
+  <section data-panel="5" hidden>
+    <h2>5. Test camera and microphone</h2>
+    <div class="devtest">
+      <div class="video-box"><video id="prev" autoplay muted playsinline></video><div class="overlay" id="prevMsg">Camera is off. Click "Test devices".</div></div>
+      <div class="stack">
+        <button type="button" class="btn btn-primary" id="testBtn">{{ icon('video') }} Test devices</button>
+        <div class="status-line"><span class="dot" id="camDot"></span><span id="camTxt">Camera: not tested</span></div>
+        <div class="status-line"><span class="dot" id="micDot"></span><span id="micTxt">Microphone: not tested</span></div>
+        <div><div class="small muted" style="margin-bottom:6px">Speak to see your mic level</div><div class="level" aria-hidden="true"><i id="lvl"></i></div></div>
+        <div class="banner info">{{ icon('mic') }} Speech transcription: <strong>{{ 'Whisper is ready' if whisper_ok else 'Whisper is not installed on this server, so you will type your answers' }}</strong>.</div>
+        <p class="small muted">Camera is only a preview for you. It is never recorded or analysed. You can continue without devices and type answers.</p>
+      </div>
+    </div>
+  </section>
+
+  <section data-panel="6" hidden>
+    <h2>6. Ready to start</h2>
+    <div class="card flat" id="summary"></div>
+    <p class="small muted" style="margin-top:12px">Tip: sit somewhere quiet, answer in 4-6 sentences and include an example.</p>
+    <div id="startErr" class="banner err" hidden></div>
+  </section>
+
+  <div class="row between" style="margin-top:24px">
+    <button type="button" class="btn" id="back">Back</button>
+    <button type="button" class="btn btn-primary" id="next">Next {{ icon('arrow') }}</button>
+  </div>
+</form>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/setup.js') }}"></script>{% endblock %}

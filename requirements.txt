@@ -1,0 +1,14 @@
+# Core (required)
+Flask>=3.0
+python-dotenv>=1.0
+requests>=2.31
+numpy>=1.24
+scikit-learn>=1.3
+pypdf>=4.0
+reportlab>=4.0
+pytest>=8.0
+
+# Optional upgrades (the app detects them automatically and says which mode it is in)
+# openai-whisper>=20231117         # speech-to-text (or: faster-whisper)
+# sentence-transformers>=2.2       # better semantic embeddings than TF-IDF
+# faiss-cpu>=1.7                   # FAISS vector index (NumPy cosine is used otherwise)

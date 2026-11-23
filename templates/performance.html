@@ -1,0 +1,22 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}My Performance{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>My performance</h1><p>Skill analytics across all completed interviews.</p></div></div>
+{% if not p.interviews %}
+<div class="card"><div class="empty">{{ icon('chart') }}<p>Complete an interview to unlock your analytics.</p><a class="btn btn-primary btn-sm" href="{{ url_for('web.interview_new') }}">Start an interview</a></div></div>
+{% else %}
+<p class="muted small" id="chartFallback" hidden>Charts could not load (offline?). Tables below still show your data.</p>
+<div class="grid g2">
+  <div class="card"><h3>Score trend</h3><div class="chart-box"><canvas id="cTrend"></canvas></div></div>
+  <div class="card"><h3>Technical vs communication</h3><div class="chart-box"><canvas id="cCompare"></canvas></div></div>
+  <div class="card"><h3>Skill-wise performance</h3><div class="chart-box"><canvas id="cTopics"></canvas></div></div>
+  <div class="card"><h3>Question difficulty vs score</h3><div class="chart-box"><canvas id="cDiff"></canvas></div></div>
+</div>
+<div class="card" style="margin-top:18px"><h3>Weak-topic heatmap</h3><p class="muted small">Average score per topic and difficulty. Red cells are where to practice.</p><div id="heat" class="heat"></div>
+  <div class="row small muted" style="margin-top:12px"><span class="chip bad">&lt; 50</span><span class="chip ok">50-74</span><span class="chip good">75+</span><span>Grey = not asked</span></div></div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+{% if p.interviews %}<script>const P = {{ p|tojson_safe|safe }};</script><script src="{{ url_for('static', filename='js/performance.js') }}"></script>{% endif %}
+{% endblock %}

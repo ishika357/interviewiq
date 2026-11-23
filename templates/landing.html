@@ -1,0 +1,66 @@
+{% extends 'base_public.html' %}
+{% from '_icons.html' import icon %}
+{% block content %}
+<section class="hero" id="home"><div class="container hero-grid">
+  <div>
+    <span class="chip cyan">{{ icon('sparkle') }} AI Interview Intelligence Platform</span>
+    <h1 style="margin-top:16px">Ace Your Next <span class="grad-text">Interview</span> with AI.</h1>
+    <p class="lead">Practice interviews, receive intelligent feedback, identify skill gaps and build confidence through personalized AI-powered preparation.</p>
+    <div class="row" style="margin-top:26px">
+      <a class="btn btn-primary btn-lg" href="{{ url_for('web.register') if not user else url_for('web.interview_new') }}">Start Practicing {{ icon('arrow') }}</a>
+      <a class="btn btn-lg" href="#features">Explore Features</a>
+    </div>
+    <p class="small muted" style="margin-top:18px">Adaptive questions &middot; Whisper speech analysis &middot; RAG-grounded feedback &middot; Sandboxed coding round</p>
+  </div>
+  <div class="mock" aria-label="Illustration of the interview room (sample layout, not real data)">
+    <div class="bar"><i></i><i></i><i></i></div>
+    <div class="q"><span class="chip">Question 3 of 10</span><p style="margin:10px 0 0;font-weight:700">Explain the bias-variance tradeoff.</p></div>
+    <div class="row" style="gap:10px;align-items:stretch">
+      <div class="q" style="flex:1;margin:0"><div class="small muted">Concept coverage</div>
+        <div class="meter"><b style="width:72%"></b></div><div class="small muted" style="margin-top:10px">Relevance</div><div class="meter"><b style="width:88%"></b></div>
+        <div class="small muted" style="margin-top:10px">Delivery</div><div class="meter"><b style="width:64%"></b></div></div>
+      <div class="q" style="flex:1;margin:0;display:grid;place-items:center;text-align:center">
+        <div>{{ icon('video') }}<div class="small muted">Camera preview</div><span class="chip bad" style="margin-top:8px"><span class="dot rec"></span> Recording</span></div></div>
+    </div>
+    <p class="small muted" style="margin:12px 0 0;text-align:center">Illustrative layout only</p>
+  </div>
+</div></section>
+
+<section class="block" id="features"><div class="container">
+  <h2>Everything you need to prepare like a pro</h2>
+  <p class="sub">Not a chatbot. A full interview pipeline that listens, evaluates, explains and builds a study plan from your real answers.</p>
+  <div class="grid g3">
+    {% for ic, t, d in [
+      ('brain','Adaptive AI interviewer','Follow-up questions change with your answers: weak answers get a foundation probe, strong ones get a deeper challenge.'),
+      ('file','Resume-based interviews','Upload a PDF and get questions on the skills and projects actually listed in it. Nothing is invented.'),
+      ('target','Semantic answer evaluation','Rubric scoring with concept coverage, embeddings and quoted evidence from your own answer.'),
+      ('mic','Speech intelligence','Whisper transcription with pace, filler words, pauses and repetition analysis. No emotion guessing.'),
+      ('book','RAG knowledge assistant','Feedback and explanations grounded in a technical knowledge base, with source references.'),
+      ('code','Coding interview simulator','Run Python against test cases in an isolated sandbox, with complexity analysis.'),
+      ('map','Personalized roadmap','A 7-day plan built from the concepts you missed and the topics you scored lowest on.'),
+      ('sparkle','Interview Copilot','Ask why you lost marks, get a better answer or another question on a weak topic.'),
+      ('chart','Progress analytics','Score trends, weak-topic heatmap, difficulty versus score and technical versus communication.')] %}
+    <div class="card feature"><div class="ico">{{ icon(ic) }}</div><h3>{{ t }}</h3><p class="muted small" style="margin:0">{{ d }}</p></div>
+    {% endfor %}
+  </div>
+</div></section>
+
+<section class="block" id="how" style="background:var(--bg2)"><div class="container">
+  <h2>How it works</h2><p class="sub">From setup to a personalized study plan in four steps.</p>
+  <div class="grid g4">
+    {% for n, t, d in [(1,'Configure','Pick a role, difficulty, number of questions and optionally upload your resume.'),(2,'Interview','Answer by voice with camera on, or type. Questions adapt as you go.'),(3,'Get evaluated','Every answer is scored on technical knowledge, relevance, quality and delivery.'),(4,'Improve','Review model answers, chat with the Copilot, and follow your roadmap.')] %}
+    <div class="card flat"><div class="step-num">{{ n }}</div><h3>{{ t }}</h3><p class="muted small" style="margin:0">{{ d }}</p></div>
+    {% endfor %}
+  </div>
+</div></section>
+
+<section class="block"><div class="container">
+  <h2>Built for real improvement</h2><p class="sub">Every metric comes from your saved answers. No fabricated scores.</p>
+  <div class="grid g3">
+    <div class="card"><h3>{{ icon('shield') }} Honest scoring</h3><p class="muted small" style="margin:0">Scores show their evidence: which concepts you covered, which you missed, and which sentence proved it.</p></div>
+    <div class="card"><h3>{{ icon('users') }} Practice without pressure</h3><p class="muted small" style="margin:0">Repeat interviews as often as you like and watch your trend improve across attempts.</p></div>
+    <div class="card"><h3>{{ icon('refresh') }} Safe by design</h3><p class="muted small" style="margin:0">Duplicate-proof submissions, validated uploads and sandboxed code execution.</p></div>
+  </div>
+  <div class="center" style="margin-top:40px"><a class="btn btn-primary btn-lg" href="{{ url_for('web.register') }}">Create your free account</a></div>
+</div></section>
+{% endblock %}

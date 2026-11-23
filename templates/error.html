@@ -1,0 +1,11 @@
+{% extends 'base_public.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}Error {{ code }} - InterviewIQ{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="card auth-card center">
+  <div style="color:var(--bad)">{{ icon('alert') }}</div>
+  <h2>{{ code }}</h2><p class="muted">{{ message }}</p>
+  <a class="btn btn-primary" href="/">Back to home</a>
+</div></div>
+{% endblock %}

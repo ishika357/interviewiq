@@ -1,0 +1,29 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Settings</h1><p>Security, data and system status.</p></div></div>
+<div class="grid g2">
+  <form class="card" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="action" value="password">
+    <h3>{{ icon('shield') }} Change password</h3>
+    <div class="field"><label for="cur">Current password</label><input id="cur" name="current" type="password" autocomplete="current-password" required></div>
+    <div class="field"><label for="new">New password (min 8 characters)</label><input id="new" name="new" type="password" autocomplete="new-password" minlength="8" required></div>
+    <button class="btn btn-primary" type="submit">Update password</button></form>
+
+  <div class="card"><h3>{{ icon('settings') }} System status</h3>
+    <p class="muted small">What this server is actually running. Features degrade gracefully and always say which mode they use.</p>
+    <table class="t"><tbody>
+      <tr><td>LLM</td><td>{{ sysinfo.llm }}</td></tr>
+      <tr><td>Speech (Whisper)</td><td>{{ sysinfo.whisper }}</td></tr>
+      <tr><td>Embeddings</td><td>{{ sysinfo.embeddings }}</td></tr>
+      <tr><td>Vector index</td><td>{{ sysinfo.vector_index }} ({{ sysinfo.kb_chunks }} chunks)</td></tr>
+      <tr><td>Code sandbox</td><td>{{ sysinfo.sandbox }}{% if sysinfo.network_isolation %}, network isolated{% else %}, no network namespace available{% endif %}</td></tr>
+    </tbody></table></div>
+
+  <form class="card" method="post" style="border-color:rgba(255,107,129,.4)"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="action" value="delete">
+    <h3 class="bad">{{ icon('alert') }} Delete account</h3>
+    <p class="muted small">Permanently deletes your account, interviews, answers and code submissions.</p>
+    <div class="field"><label for="conf">Type DELETE to confirm</label><input id="conf" name="confirm" type="text" autocomplete="off"></div>
+    <button class="btn btn-danger" type="submit">Delete my account</button></form>
+</div>
+{% endblock %}

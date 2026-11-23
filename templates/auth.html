@@ -1,0 +1,21 @@
+{% extends 'base_public.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}{{ 'Create account' if mode=='register' else 'Log in' }} - InterviewIQ{% endblock %}
+{% block footer %}{% endblock %}
+{% block content %}
+<div class="auth-wrap"><div class="card auth-card">
+  <h2>{{ 'Create your account' if mode=='register' else 'Welcome back' }}</h2>
+  <p class="muted">{{ 'Start practicing in under a minute.' if mode=='register' else 'Log in to continue your preparation.' }}</p>
+  {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="flash {{ cat }}" role="alert">{{ m }}</div>{% endfor %}{% endwith %}
+  <form method="post" novalidate>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    {% if mode=='register' %}<div class="field"><label for="name">Full name</label><input id="name" name="name" type="text" autocomplete="name" required maxlength="60"></div>{% endif %}
+    <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required></div>
+    <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" autocomplete="{{ 'new-password' if mode=='register' else 'current-password' }}" required minlength="8">
+      {% if mode=='register' %}<span class="small muted">At least 8 characters.</span>{% endif %}</div>
+    <button class="btn btn-primary" style="width:100%" type="submit">{{ 'Create account' if mode=='register' else 'Log in' }}</button>
+  </form>
+  <p class="small muted center" style="margin:18px 0 0">
+    {% if mode=='register' %}Already have an account? <a href="{{ url_for('web.login') }}">Log in</a>{% else %}New here? <a href="{{ url_for('web.register') }}">Create an account</a>{% endif %}</p>
+</div></div>
+{% endblock %}

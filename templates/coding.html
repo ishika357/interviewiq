@@ -1,0 +1,26 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}{{ problem.title }}{% endblock %}
+{% block content %}
+<div class="page-head"><div><a class="small" href="{{ url_for('web.coding_list') }}">&larr; All problems</a><h1>{{ problem.title }}</h1>
+  <span class="chip {{ ['','good','ok','bad'][problem.difficulty] }}">{{ ['','Easy','Medium','Hard'][problem.difficulty] }}</span></div></div>
+<div class="code-layout">
+  <div class="card stack">
+    <h3>Problem</h3><p>{{ problem.prompt }}</p>
+    <h3>Examples</h3>
+    {% for ex in problem.examples %}<div><div class="small muted">Example {{ loop.index }}</div><pre class="out">{{ problem.fn }}({{ ex.args|map('tojson')|join(', ') }})  ->  {{ ex.expected|tojson }}</pre></div>{% endfor %}
+    <div class="banner info small">Your code runs in an isolated process with a time limit, memory limit, no file access, no network and a restricted import list (math, collections, itertools, heapq, re, ...). {{ problem.total_tests }} tests total; some are hidden.</div>
+  </div>
+  <div class="card stack">
+    <div class="row between"><h3 style="margin:0">Python solution</h3><span class="small muted">Tab inserts 4 spaces</span></div>
+    <textarea id="code" class="editor" spellcheck="false" aria-label="Code editor">{{ last_code if last_code else problem.starter }}</textarea>
+    <div class="row">
+      <button class="btn" id="runBtn">{{ icon('play') }} Run examples</button>
+      <button class="btn btn-primary" id="submitBtn">{{ icon('check') }} Submit</button>
+      <button class="btn btn-ghost btn-sm" id="resetBtn">Reset</button>
+    </div>
+    <div id="result"></div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script>const PID = {{ problem.id|tojson }}, STARTER = {{ problem.starter|tojson }};</script><script src="{{ url_for('static', filename='js/coding.js') }}"></script>{% endblock %}

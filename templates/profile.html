@@ -1,0 +1,22 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Profile</h1><p>Your account and activity.</p></div></div>
+<div class="grid g2">
+  <form class="card" method="post">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <div class="row" style="margin-bottom:16px"><div class="avatar" style="width:54px;height:54px;font-size:1.4rem">{{ user.name[:1]|upper }}</div><div><strong>{{ user.name }}</strong><div class="muted small">{{ user.email }}</div></div></div>
+    <div class="field"><label for="name">Full name</label><input id="name" name="name" type="text" value="{{ user.name }}" maxlength="60" required></div>
+    <div class="field"><label for="tr">Target role</label><input id="tr" name="target_role" type="text" value="{{ user.target_role }}" maxlength="60" placeholder="e.g. AI Engineer"></div>
+    <button class="btn btn-primary" type="submit">Save changes</button>
+  </form>
+  <div class="card"><h3>Your activity</h3>
+    <div class="grid g2" style="margin-top:10px">
+      <div class="stat"><div class="label">Completed interviews</div><div class="val">{{ stats.total }}</div></div>
+      <div class="stat"><div class="label">Average score</div><div class="val">{{ stats.average if stats.average is not none else '-' }}</div></div>
+      <div class="stat"><div class="label">Best score</div><div class="val">{{ stats.best if stats.best is not none else '-' }}</div></div>
+      <div class="stat"><div class="label">Member since</div><div class="val" style="font-size:1.1rem">{{ user.created_at[:10] }}</div></div>
+    </div></div>
+</div>
+{% endblock %}

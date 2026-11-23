@@ -1,0 +1,16 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}Coding Practice{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Coding interview practice</h1><p>Write Python, run it against test cases in an isolated sandbox, and get complexity feedback.</p></div></div>
+<div class="grid g3">
+  {% for p in problems %}
+  <a class="card feature" href="{{ url_for('web.coding_problem', pid=p.id) }}" style="text-decoration:none;color:inherit">
+    <div class="row between"><div class="ico" style="width:38px;height:38px;border-radius:10px;display:grid;place-items:center;background:rgba(134,103,245,.15);color:var(--primary)">{{ icon('code') }}</div>
+      {% if p.id in solved %}<span class="chip good">Solved</span>{% endif %}</div>
+    <h3 style="margin-top:12px">{{ p.title }}</h3>
+    <p class="muted small">{{ p.prompt[:110] }}{{ '...' if p.prompt|length > 110 }}</p>
+    <span class="chip {{ ['','good','ok','bad'][p.difficulty] }}">{{ ['','Easy','Medium','Hard'][p.difficulty] }}</span>
+  </a>{% endfor %}
+</div>
+{% endblock %}

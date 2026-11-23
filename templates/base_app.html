@@ -1,0 +1,41 @@
+{% from '_icons.html' import icon %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}InterviewIQ{% endblock %} - InterviewIQ</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<div class="topbar"><button class="btn btn-ghost btn-sm" id="navToggle" aria-label="Open menu" aria-controls="sidebar">{{ icon('menu') }}</button>
+  <a class="logo" href="{{ url_for('web.dashboard') }}"><span class="logo-mark">{{ icon('brain') }}</span>InterviewIQ</a></div>
+<div class="shell">
+  <aside class="sidebar" id="sidebar" aria-label="Sidebar">
+    <a class="logo" href="{{ url_for('web.dashboard') }}"><span class="logo-mark">{{ icon('brain') }}</span>InterviewIQ</a>
+    <nav class="nav" aria-label="Workspace">
+      <div class="nav-label">WORKSPACE</div>
+      <a href="{{ url_for('web.dashboard') }}" class="{{ 'on' if active=='dashboard' }}">{{ icon('home') }}Dashboard</a>
+      <a href="{{ url_for('web.interview_new') }}" class="{{ 'on' if active=='start' }}">{{ icon('play') }}Start Interview</a>
+      <a href="{{ url_for('web.coding_list') }}" class="{{ 'on' if active=='coding' }}">{{ icon('code') }}Coding Practice</a>
+      <a href="{{ url_for('web.history') }}" class="{{ 'on' if active=='history' }}">{{ icon('history') }}Interview History</a>
+      <a href="{{ url_for('web.performance') }}" class="{{ 'on' if active=='performance' }}">{{ icon('chart') }}My Performance</a>
+      <div class="nav-label">ACCOUNT</div>
+      <a href="{{ url_for('web.profile') }}" class="{{ 'on' if active=='profile' }}">{{ icon('user') }}Profile</a>
+      <a href="{{ url_for('web.settings') }}" class="{{ 'on' if active=='settings' }}">{{ icon('settings') }}Settings</a>
+      <form method="post" action="{{ url_for('web.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">{{ icon('logout') }}Logout</button></form>
+    </nav>
+    <div class="side-user"><div class="avatar">{{ user.name[:1]|upper }}</div><div style="min-width:0"><div style="font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ user.name }}</div><div class="small muted" style="overflow:hidden;text-overflow:ellipsis">{{ user.email }}</div></div></div>
+  </aside>
+  <main class="main" id="main">
+    {% with msgs = get_flashed_messages(with_categories=true) %}{% for cat, m in msgs %}<div class="flash {{ cat }}" role="alert">{{ m }}</div>{% endfor %}{% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

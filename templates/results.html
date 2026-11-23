@@ -1,0 +1,99 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}Results #{{ interview.id }}{% endblock %}
+{% block content %}
+{% set avg = report.averages or {} %}
+<div class="page-head">
+  <div><h1>Interview results</h1>
+    <p>{{ interview.role }} &middot; {{ interview.difficulty }} &middot; {{ interview.num_questions }} questions &middot; {{ interview.completed_at|pretty_dt }}
+      &middot; <span class="chip {{ 'cyan' if report.engine=='llm' else '' }}" title="How answers were scored">Evaluation: {{ 'LLM + rubric' if report.engine=='llm' else 'rubric + semantic similarity (no LLM key)' }}</span></p></div>
+  <div class="row">
+    <a class="btn" href="{{ url_for('web.report_download', iid=interview.id) }}">{{ icon('download') }} Download PDF report</a>
+    <a class="btn btn-primary" href="{{ url_for('web.interview_new') }}?role={{ (interview.role if interview.role in ['AI Engineer','Python Developer','Data Analyst','Software Developer','Machine Learning Engineer','QA Engineer'] else '')|urlencode }}{{ '&custom=' ~ interview.role|urlencode if interview.role not in ['AI Engineer','Python Developer','Data Analyst','Software Developer','Machine Learning Engineer','QA Engineer'] }}&difficulty={{ interview.difficulty }}&num_questions={{ interview.num_questions }}">{{ icon('refresh') }} Retake interview</a>
+  </div>
+</div>
+
+<div class="rings">
+  {% for key, label in [('overall','Overall'),('technical','Technical knowledge'),('communication','Communication'),('relevance','Answer relevance'),('quality','Answer quality')] %}
+  <div class="card ring {{ avg[key]|score_class }}" style="--v:{{ avg[key] or 0 }}"><div class="disc"><span>{{ '%.0f'|format(avg[key] or 0) }}</span></div><div class="small muted">{{ label }}</div></div>
+  {% endfor %}
+</div>
+
+<div class="grid g2" style="margin-top:18px">
+  <div class="card"><h3 class="good">{{ icon('check') }} Strengths</h3>
+    {% if report.strengths %}<ul class="clean">{% for s in report.strengths %}<li>{{ s }}</li>{% endfor %}</ul>
+    {% else %}<p class="muted">No topic reached the strong threshold (80) yet. Keep practicing.</p>{% endif %}</div>
+  <div class="card"><h3 class="bad">{{ icon('alert') }} Weaknesses</h3>
+    {% if report.weaknesses %}<ul class="clean">{% for s in report.weaknesses %}<li>{{ s }}</li>{% endfor %}</ul>
+    {% else %}<p class="muted">No topic fell below the weak threshold (65).</p>{% endif %}</div>
+</div>
+
+<div class="grid g2" style="margin-top:18px;grid-template-columns:1.3fr 1fr">
+  <div class="card"><h3>{{ icon('chart') }} Score per question</h3><div class="chart-box"><canvas id="qChart" role="img" aria-label="Score per question"></canvas></div><p class="muted small" id="chartFallback" hidden>Chart could not load; see per-question scores below.</p></div>
+  <div class="card"><h3>{{ icon('target') }} Personalized recommendations</h3>
+    <ul class="clean">{% for r in report.recommendations %}<li>{{ r }}</li>{% endfor %}</ul>
+    {% if report.speech_summary %}<hr style="border:0;border-top:1px solid var(--border);margin:14px 0">
+    <div class="small"><strong>Speech summary</strong> ({{ report.speech_summary.answers_spoken }} spoken answers)<br>
+      Average pace: {{ report.speech_summary.avg_wpm or 'n/a' }} wpm &middot; Fillers per 100 words: {{ report.speech_summary.filler_per_100 }}
+      <div class="muted">Delivery metrics only. They say nothing about confidence, honesty or emotion.</div></div>{% endif %}
+    {% if report.skipped %}<p class="small muted" style="margin-top:10px">{{ report.skipped }} question(s) were skipped and scored 0.</p>{% endif %}</div>
+</div>
+
+<h2 style="margin:30px 0 14px">Question-wise feedback</h2>
+{% for t in turns %}{% set ev = t.eval or {} %}{% set rb = ev.rubric or {} %}
+<details class="qa" {{ 'open' if loop.first }}>
+  <summary><span class="score-pill {{ t.overall|score_class }}">{{ '%.0f'|format(t.overall) }}</span>
+    <span style="flex:1"><strong>Q{{ t.idx + 1 }}. {{ t.question }}</strong><div class="small muted">{{ labels.get(t.topic, t.topic) }} &middot; {{ ['','Easy','Medium','Hard'][t.difficulty] }}{% if t.kind != 'base' %} &middot; {{ {'probe':'Foundation check','followup':'Adaptive follow-up','resume':'From your resume'}.get(t.kind, t.kind) }}{% endif %}</div></span></summary>
+  <div class="body">
+    <div class="sub-scores">
+      {% for k, l in [('technical','Technical'),('relevance','Relevance'),('quality','Quality'),('communication','Delivery')] %}<div><b class="{{ t[k]|score_class }}">{{ '%.0f'|format(t[k]) }}</b><span class="small muted">{{ l }}</span></div>{% endfor %}
+    </div>
+    <div><div class="small muted">Your answer ({{ t.answer_source }})</div><div class="answer-quote">{{ t.answer_text or '(skipped)' }}</div></div>
+    <div><strong>Feedback.</strong> {{ ev.feedback }}</div>
+    <div class="grid g2">
+      <div><div class="small muted">What you did well</div>{% if ev.strengths %}<ul class="clean">{% for s in ev.strengths %}<li>{{ s }}</li>{% endfor %}</ul>{% else %}<p class="muted small">Nothing notable yet.</p>{% endif %}</div>
+      <div><div class="small muted">To improve</div>{% if ev.weaknesses %}<ul class="clean">{% for s in ev.weaknesses %}<li>{{ s }}</li>{% endfor %}</ul>{% else %}<p class="muted small">No major gaps found.</p>{% endif %}</div>
+    </div>
+    {% if rb.matched or rb.missing %}<div><div class="small muted">Concept check</div><div class="tags">
+      {% for m in rb.matched %}<span class="chip good">&#10003; {{ m }}</span>{% endfor %}{% for m in rb.missing %}<span class="chip bad">&times; {{ m }}</span>{% endfor %}</div></div>{% endif %}
+    {% if ev.evidence %}<div><div class="small muted">Evidence from your answer</div><ul class="clean">{% for e in ev.evidence %}<li><strong>{{ e.concept }}:</strong> &ldquo;{{ e.quote }}&rdquo;</li>{% endfor %}</ul></div>{% endif %}
+    {% if ev.speech_feedback %}<div><div class="small muted">Communication feedback</div><ul class="clean">{% for s in ev.speech_feedback %}<li>{{ s }}</li>{% endfor %}</ul></div>{% endif %}
+    {% if ev.improved_answer %}<div><div class="small muted">Suggested improved answer <span class="chip">{{ ev.improved_answer_source }}</span></div><div class="answer-quote" style="border-color:var(--accent)">{{ ev.improved_answer }}</div></div>{% endif %}
+  </div>
+</details>
+{% endfor %}
+
+{% set rm = report.roadmap or {} %}
+<h2 style="margin:30px 0 14px">{{ icon('map') }} Your learning roadmap</h2>
+<div class="card">
+  <p class="muted">{{ rm.summary }}</p>
+  <div class="timeline">
+    {% for d in rm.days %}<div class="day"><strong>{{ d.day }}: {{ d.title }}</strong>
+      <ul class="clean small" style="margin-top:6px">{% for t in d.tasks %}<li>{{ t }}</li>{% endfor %}</ul>
+      {% if d.resources %}<div class="tags" style="margin-top:6px">{% for r in d.resources %}<span class="chip cyan">{{ icon('book') }} {{ r.source }} / {{ r.section }}</span>{% endfor %}</div>{% endif %}</div>{% endfor %}
+  </div>
+  <p class="small muted" style="margin:0">{{ rm.basis }}</p>
+</div>
+
+<h2 style="margin:30px 0 14px">{{ icon('sparkle') }} Interview Copilot</h2>
+<div class="card chat">
+  <div class="suggest">
+    {% for s in ['Why did I lose marks?','Give me a better answer','Ask me another question','What should I study next?','Explain bias-variance tradeoff'] %}<button class="chip" type="button" data-q="{{ s }}">{{ s }}</button>{% endfor %}
+  </div>
+  <div class="chat-log" id="chatLog" aria-live="polite"><div class="msg bot">Hi! Ask about any question by number (for example "better answer for question 2"), or ask me to explain a concept. Concept explanations come only from the knowledge base and always show their source.</div></div>
+  <form id="chatForm" class="row" style="margin-top:10px;flex-wrap:nowrap"><input id="chatIn" type="text" maxlength="500" placeholder="Ask the Copilot..." aria-label="Message the copilot"><button class="btn btn-primary" type="submit">Send</button></form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+const IID = {{ interview.id }};
+const qData = {{ turns|map(attribute='overall')|list|tojson_safe|safe }};
+loadChart().then(C => {
+  if (!C) { document.getElementById('chartFallback').hidden = false; return; }
+  new C(document.getElementById('qChart'), { type: 'bar',
+    data: { labels: qData.map((_, i) => 'Q' + (i + 1)), datasets: [{ data: qData, backgroundColor: qData.map(v => v >= 75 ? '#3ddc97' : v >= 50 ? '#f5b83d' : '#ff6b81'), borderRadius: 8 }] },
+    options: { maintainAspectRatio: false, scales: { y: { min: 0, max: 100 } }, plugins: { legend: { display: false } } } });
+});
+</script>
+<script src="{{ url_for('static', filename='js/copilot.js') }}"></script>
+{% endblock %}

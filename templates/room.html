@@ -1,0 +1,67 @@
+{% from '_icons.html' import icon %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Interview in progress - InterviewIQ</title>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body>
+<div class="room" id="room" data-iid="{{ interview.id }}" data-whisper="{{ 1 if whisper_ok else 0 }}">
+  <header class="room-top">
+    <a class="logo" href="{{ url_for('web.dashboard') }}" id="exitLink" title="Leave (your saved answers are kept)"><span class="logo-mark">{{ icon('brain') }}</span></a>
+    <div class="prog">
+      <div class="row between small muted"><span id="progText">Question 1 of {{ interview.num_questions }}</span><span>{{ interview.role }} &middot; {{ interview.difficulty }}</span></div>
+      <div class="bar-track" style="margin-top:6px"><div class="bar-fill" id="progBar" style="width:0"></div></div>
+    </div>
+    <span class="rec-ind" id="recInd"><span class="dot" id="recDot"></span><span id="recTxt">Not recording</span></span>
+    <span class="timer" id="timer" aria-label="Elapsed time">00:00</span>
+  </header>
+
+  <div class="room-body">
+    <section class="card q-card" aria-live="polite">
+      <div class="row"><span class="chip" id="topicChip">-</span><span class="chip cyan" id="kindChip" hidden></span><span class="chip" id="diffChip">-</span></div>
+      <div class="q-text" id="qText">Loading your question...</div>
+
+      <div class="answer-box">
+        <label for="answer">Your answer <span class="muted small" id="answerHint">(record with your voice, or type)</span></label>
+        <textarea id="answer" placeholder="Your transcript will appear here. You can edit it before submitting." disabled></textarea>
+      </div>
+      <div id="msg" class="banner" hidden></div>
+      <div class="controls">
+        <button class="btn btn-primary" id="startRec" disabled>{{ icon('mic') }} Start recording</button>
+        <button class="btn btn-danger" id="stopRec" hidden>{{ icon('stop') }} Stop recording</button>
+        <button class="btn btn-primary" id="submit" disabled>{{ icon('check') }} Submit answer</button>
+        <button class="btn btn-ghost" id="skip" disabled>Skip</button>
+        <button class="btn btn-primary" id="nextQ" hidden>Next question {{ icon('arrow') }}</button>
+        <button class="btn btn-primary" id="finish" hidden>{{ icon('sparkle') }} Finish and see results</button>
+      </div>
+    </section>
+
+    <aside class="stack">
+      <div class="video-box" id="videoBox"><video id="cam" autoplay muted playsinline></video><div class="overlay" id="camMsg">Starting camera...</div></div>
+      <div class="card flat">
+        <div class="status-line"><span class="dot" id="camDot"></span><span id="camTxt">Camera: starting</span></div>
+        <div class="status-line" style="margin-top:8px"><span class="dot" id="micDot"></span><span id="micTxt">Microphone: starting</span></div>
+        <div class="level" style="margin-top:12px" aria-hidden="true"><i id="lvl"></i></div>
+        <p class="small muted" style="margin:12px 0 0">The camera is a private preview and is not recorded or analysed. Audio is transcribed and then discarded.</p>
+      </div>
+      <div class="card flat small muted">Tip: answer in 4-6 sentences, define the idea, explain how it works, then give an example.</div>
+    </aside>
+  </div>
+</div>
+
+<div class="processing" id="processing" hidden role="alertdialog" aria-live="assertive" aria-labelledby="procTitle">
+  <div class="card box">
+    <div class="row"><div class="spinner" id="procSpin"></div><h3 id="procTitle" style="margin:0">Processing</h3></div>
+    <p class="muted small" id="procSub">Working on it. This can take a few seconds.</p>
+    <div id="stages"></div>
+  </div>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/room.js') }}"></script>
+</body>
+</html>

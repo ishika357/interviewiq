@@ -1,0 +1,18 @@
+{% extends 'base_app.html' %}
+{% from '_icons.html' import icon %}
+{% block title %}Interview History{% endblock %}
+{% block content %}
+<div class="page-head"><div><h1>Interview history</h1><p>Every interview you have started.</p></div><a class="btn btn-primary" href="{{ url_for('web.interview_new') }}">{{ icon('play') }} New interview</a></div>
+<div class="card">
+{% if rows %}
+<div style="overflow-x:auto"><table class="t">
+  <thead><tr><th>#</th><th>Role</th><th>Level</th><th>Questions</th><th>Date</th><th>Status</th><th>Score</th><th></th></tr></thead>
+  <tbody>{% for r in rows %}<tr>
+    <td>{{ r.id }}</td><td><strong>{{ r.role }}</strong>{% if r.resume_filename %} <span class="chip">resume</span>{% endif %}</td><td>{{ r.difficulty }}</td><td>{{ r.num_questions }}</td><td>{{ r.created_at|pretty_dt }}</td>
+    <td>{% if r.status=='completed' %}<span class="chip good">Completed</span>{% else %}<span class="chip ok">In progress</span>{% endif %}</td>
+    <td>{% if r.overall is not none %}<span class="score-pill {{ r.overall|score_class }}">{{ '%.0f'|format(r.overall) }}</span>{% else %}-{% endif %}</td>
+    <td style="text-align:right">{% if r.status=='completed' %}<a class="btn btn-sm" href="{{ url_for('web.results', iid=r.id) }}">View report</a>{% else %}<a class="btn btn-sm btn-primary" href="{{ url_for('web.interview_room', iid=r.id) }}">Resume</a>{% endif %}</td>
+  </tr>{% endfor %}</tbody></table></div>
+{% else %}<div class="empty">{{ icon('history') }}<p>No interviews yet.</p><a class="btn btn-primary btn-sm" href="{{ url_for('web.interview_new') }}">Start your first interview</a></div>{% endif %}
+</div>
+{% endblock %}
