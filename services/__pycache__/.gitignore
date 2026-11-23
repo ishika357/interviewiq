@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local database
+instance/*.db
+
+# Environment variables and secrets
+.env
+
+# Virtual environments
+.venv/
+venv/
